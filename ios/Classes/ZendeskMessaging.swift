@@ -163,7 +163,7 @@ public class ZendeskMessaging: NSObject {
     }
 
     func updatePushNotificationToken(token: String) {
-        PushNotifications.updatePushNotificationToken(token)
+        PushNotifications.updatePushNotificationToken(Data(token.utf8))
     }
 
     func setLoggable(isLoggable: Bool) {
