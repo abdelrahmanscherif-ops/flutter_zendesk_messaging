@@ -112,7 +112,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin {
             zendeskMessaging?.clearConversationFields()
             result(nil)
         case "updatePushNotificationToken":
-            let token: Bool = arguments?["token"] as! String
+            let token: String = arguments?["token"] as! String
             zendeskMessaging?.updatePushNotificationToken(token:token)
             result(nil)
         case "setLoggable":
