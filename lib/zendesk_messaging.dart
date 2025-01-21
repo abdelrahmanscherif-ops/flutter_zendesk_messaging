@@ -216,4 +216,23 @@ class ZendeskMessaging {
       debugPrint('ZendeskMessaging - clearConversationFields - Error: $e}');
     }
   }
+
+  static Future<void> updatePushNotificationToken(String token) async {
+    try {
+      await _channel.invokeMethod(
+        'updatePushNotificationToken',
+        {'token': token},
+      );
+    } catch (e) {
+      debugPrint('ZendeskMessaging - updatePushNotificationToken - Error: $e}');
+    }
+  }
+
+  static Future<void> setLoggable(bool isLoggable) async {
+    try {
+      await _channel.invokeMethod('setLoggable', {'isLoggable': isLoggable});
+    } catch (e) {
+      debugPrint('ZendeskMessaging - setLoggable - Error: $e}');
+    }
+  }
 }

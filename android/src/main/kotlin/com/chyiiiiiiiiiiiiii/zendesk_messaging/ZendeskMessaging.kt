@@ -5,11 +5,13 @@ import io.flutter.plugin.common.MethodChannel
 import zendesk.android.Zendesk
 import zendesk.android.events.ZendeskEvent
 import zendesk.android.events.ZendeskEventListener
+import zendesk.logger.Logger;
 import zendesk.messaging.android.DefaultMessagingFactory
+import zendesk.messaging.android.push.PushNotifications
 
 class ZendeskMessaging(
     private val plugin: ZendeskMessagingPlugin,
-    private val channel: MethodChannel
+    private val channel: MethodChannel,
 ) {
     companion object {
         const val TAG = "[ZendeskMessaging]"
@@ -22,6 +24,7 @@ class ZendeskMessaging(
     private val zendeskEventListener = ZendeskEventListener { zendeskEvent ->
         when (zendeskEvent) {
             is ZendeskEvent.UnreadMessageCountChanged -> {
+                println("$TAG - UnreadMessageCountChanged - ${zendeskEvent.currentUnreadCount}")
 
                 channel.invokeMethod(
                     UNREAD_MESSAGES,
@@ -118,5 +121,13 @@ class ZendeskMessaging(
 
     fun clearConversationFields() {
         Zendesk.instance.messaging.clearConversationFields()
+    }
+
+    fun updatePushNotificationToken(token: String) {
+        PushNotifications.updatePushNotificationToken(token)
+    }
+
+    fun setLoggable(isLoggable: Boolean) {
+        Logger.setLoggable(isLoggable)
     }
 }

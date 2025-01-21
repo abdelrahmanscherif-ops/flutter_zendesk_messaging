@@ -1,4 +1,5 @@
 import UIKit
+import ZendeskSDKLogger
 import ZendeskSDKMessaging
 import ZendeskSDK
 
@@ -159,5 +160,13 @@ public class ZendeskMessaging: NSObject {
 
     func clearConversationFields() {
         Zendesk.instance?.messaging?.clearConversationFields()
+    }
+
+    func updatePushNotificationToken(token: String) {
+        PushNotifications.updatePushNotificationToken(token)
+    }
+
+    func setLoggable(isLoggable: Bool) {
+        Logger.enabled = isLoggable
     }
 }

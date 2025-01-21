@@ -163,7 +163,20 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 zendeskMessaging.clearConversationFields()
                 result.success(null)
             }
-
+            "updatePushNotificationToken" -> {
+                val token = call.argument<String>("token")
+                if (token.isNullOrEmpty()) {
+                    result.error("update_push_notification_token_error", "token is empty or null", null)
+                    return
+                }
+                zendeskMessaging.updatePushNotificationToken(token)
+                result.success(null)
+            }
+            "setLoggable" -> {
+                val isLoggable = call.argument<Boolean>("isLoggable") ?: false
+                zendeskMessaging.setLoggable(isLoggable)
+                result.success(null)
+            }
             "invalidate" -> {
                 if (!isInitialized) {
                     println("$tag - Zendesk SDK is already on an invalid state")

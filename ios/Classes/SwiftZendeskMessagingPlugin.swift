@@ -111,6 +111,14 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin {
             }
             zendeskMessaging?.clearConversationFields()
             result(nil)
+        case "updatePushNotificationToken":
+            let token: Bool = arguments?["token"] as! String
+            zendeskMessaging?.updatePushNotificationToken(token:token)
+            result(nil)
+        case "setLoggable":
+            let isLoggable: Bool = arguments?["isLoggable"] as! Bool
+            zendeskMessaging?.setLoggable(isLoggable:isLoggable)
+            result(nil)
         case "invalidate":
             if (!isInitialized) {
                 print("\(TAG) - Messaging is already on an invalid state\n")
