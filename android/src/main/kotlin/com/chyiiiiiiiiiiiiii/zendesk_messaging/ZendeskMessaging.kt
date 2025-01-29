@@ -5,9 +5,10 @@ import io.flutter.plugin.common.MethodChannel
 import zendesk.android.Zendesk
 import zendesk.android.events.ZendeskEvent
 import zendesk.android.events.ZendeskEventListener
-import zendesk.logger.Logger;
+import zendesk.logger.Logger
 import zendesk.messaging.android.DefaultMessagingFactory
 import zendesk.messaging.android.push.PushNotifications
+import zendesk.messaging.android.push.PushResponsibility
 
 class ZendeskMessaging(
     private val plugin: ZendeskMessagingPlugin,
@@ -115,7 +116,7 @@ class ZendeskMessaging(
         Zendesk.instance.addEventListener(zendeskEventListener)
     }
 
-    fun setConversationFields(fields: Map<String, String>) {
+    fun setConversationFields(fields: Map<String, Any>) {
         Zendesk.instance.messaging.setConversationFields(fields)
     }
 
@@ -125,6 +126,12 @@ class ZendeskMessaging(
 
     fun updatePushNotificationToken(token: String) {
         PushNotifications.updatePushNotificationToken(token)
+        println("$TAG - updatePushNotificationToken")
+    }
+
+    fun shouldBeDisplayed(messageData: Map<String, String>): PushResponsibility {
+        PushNotifications.displayNotification(context = plugin.context, messageData = messageData)
+        return PushNotifications.shouldBeDisplayed(messageData)
     }
 
     fun setLoggable(isLoggable: Boolean) {

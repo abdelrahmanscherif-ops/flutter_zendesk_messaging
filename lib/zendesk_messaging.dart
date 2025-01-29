@@ -11,11 +11,18 @@ class ZendeskLoginResponse {
   final String? externalId;
 }
 
+enum PushResponsibility {
+  messagingShouldDisplay,
+  messagingShouldNotDisplay,
+  notFromMessaging,
+}
+
 class ZendeskMessaging {
   static const MethodChannel _channel = MethodChannel('zendesk_messaging');
 
   static final StreamController<int> _unreadMessagesCountController =
       StreamController<int>.broadcast();
+
   static Stream<int> get unreadMessagesCountStream =>
       _unreadMessagesCountController.stream;
 
@@ -225,6 +232,23 @@ class ZendeskMessaging {
       );
     } catch (e) {
       debugPrint('ZendeskMessaging - updatePushNotificationToken - Error: $e}');
+    }
+  }
+
+  static Future<PushResponsibility> shouldBeDisplayed(
+    Map<String, dynamic> messageData,
+  ) async {
+    try {
+      final result = await _channel
+          .invokeMethod<int>('shouldBeDisplayed', {'messageData': messageData});
+      return (result != null &&
+              result >= 0 &&
+              result < PushResponsibility.values.length)
+          ? PushResponsibility.values[result]
+          : PushResponsibility.notFromMessaging;
+    } catch (e) {
+      debugPrint('ZendeskMessaging - shouldBeDisplayed - Error: $e}');
+      return PushResponsibility.notFromMessaging;
     }
   }
 

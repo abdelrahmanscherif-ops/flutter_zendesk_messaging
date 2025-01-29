@@ -164,6 +164,14 @@ public class ZendeskMessaging: NSObject {
 
     func updatePushNotificationToken(token: String) {
         PushNotifications.updatePushNotificationToken(Data(token.utf8))
+        print("\(self.TAG) - updatePushNotificationToken")
+    }
+
+    func shouldBeDisplayed(messageData: [String: Any]) -> PushResponsibility {
+        PushNotifications.handleTap(messageData) { viewController in
+               // Handle displaying the returned viewController in here
+        }
+        return PushNotifications.shouldBeDisplayed(messageData)
     }
 
     func setLoggable(isLoggable: Bool) {

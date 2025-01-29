@@ -1,5 +1,6 @@
 package com.chyiiiiiiiiiiiiii.zendesk_messaging
 
+import android.content.Context
 import android.app.Activity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -18,6 +19,7 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
     private lateinit var zendeskMessaging: ZendeskMessaging
+    lateinit var context: Context
 
     var activity: Activity? = null
     var isInitialized: Boolean = false
@@ -26,6 +28,7 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "zendesk_messaging")
         channel.setMethodCallHandler(this)
+        context = flutterPluginBinding.applicationContext
         zendeskMessaging = ZendeskMessaging(this, channel)
     }
 
@@ -163,6 +166,7 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 zendeskMessaging.clearConversationFields()
                 result.success(null)
             }
+
             "updatePushNotificationToken" -> {
                 val token = call.argument<String>("token")
                 if (token.isNullOrEmpty()) {
@@ -172,11 +176,29 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 zendeskMessaging.updatePushNotificationToken(token)
                 result.success(null)
             }
+
+            "shouldBeDisplayed" -> {
+                try {
+                    val messageData = call.argument<Map<String, String>>("messageData")
+                        ?: throw Exception("messageData is empty or null")
+
+                    val responsability = zendeskMessaging.shouldBeDisplayed(messageData = messageData)
+                    println("$tag - shouldBeDisplayed: $responsability ${responsability.ordinal}")
+
+                    result.success(responsability.ordinal)
+                } catch (err: Throwable) {
+                    println("$tag - ZendeskMessaging::shouldBeDisplayed invalid arguments. {'messageData': Map<String, String>}. expected !")
+                    println(err.message)
+                    result.error("should_be_displayed_error", err.message, null)
+                }
+            }
+
             "setLoggable" -> {
                 val isLoggable = call.argument<Boolean>("isLoggable") ?: false
                 zendeskMessaging.setLoggable(isLoggable)
                 result.success(null)
             }
+
             "invalidate" -> {
                 if (!isInitialized) {
                     println("$tag - Zendesk SDK is already on an invalid state")
