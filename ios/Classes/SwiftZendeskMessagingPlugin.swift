@@ -115,14 +115,12 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin {
             let token: String = arguments?["token"] as! String
             zendeskMessaging?.updatePushNotificationToken(token:token)
             result(nil)
-        case "shouldBeDisplayed":
+        case "checkAndDisplayNotification":
             let messageData: [String: Any] = arguments?["messageData"] as! [String: Any]
-            if let responsibility = zendeskMessaging?.shouldBeDisplayed(messageData:messageData) {
-                print("\(TAG) - shouldBeDisplayed: \(responsibility) \(responsibility.rawValue)")
-
-                result(responsibility.rawValue)
+            if let didHandleNotification = zendeskMessaging?.checkAndDisplayNotification(messageData:messageData) {
+                result(didHandleNotification)
             } else {
-                reportNotInitializedFlutterError(result: result)
+                result(false)
             }
         case "setLoggable":
             let isLoggable: Bool = arguments?["isLoggable"] as! Bool

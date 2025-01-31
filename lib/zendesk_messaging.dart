@@ -11,12 +11,6 @@ class ZendeskLoginResponse {
   final String? externalId;
 }
 
-enum PushResponsibility {
-  messagingShouldDisplay,
-  messagingShouldNotDisplay,
-  notFromMessaging,
-}
-
 class ZendeskMessaging {
   static const MethodChannel _channel = MethodChannel('zendesk_messaging');
 
@@ -235,20 +229,16 @@ class ZendeskMessaging {
     }
   }
 
-  static Future<PushResponsibility> shouldBeDisplayed(
+  static Future<bool> checkAndDisplayNotification(
     Map<String, dynamic> messageData,
   ) async {
     try {
-      final result = await _channel
-          .invokeMethod<int>('shouldBeDisplayed', {'messageData': messageData});
-      return (result != null &&
-              result >= 0 &&
-              result < PushResponsibility.values.length)
-          ? PushResponsibility.values[result]
-          : PushResponsibility.notFromMessaging;
+      final result = await _channel.invokeMethod<bool>(
+          'checkAndDisplayNotification', {'messageData': messageData});
+      return result ?? false;
     } catch (e) {
       debugPrint('ZendeskMessaging - shouldBeDisplayed - Error: $e}');
-      return PushResponsibility.notFromMessaging;
+      return false;
     }
   }
 

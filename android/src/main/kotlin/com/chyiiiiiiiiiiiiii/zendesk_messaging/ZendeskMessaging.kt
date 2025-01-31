@@ -8,7 +8,9 @@ import zendesk.android.events.ZendeskEventListener
 import zendesk.logger.Logger
 import zendesk.messaging.android.DefaultMessagingFactory
 import zendesk.messaging.android.push.PushNotifications
-import zendesk.messaging.android.push.PushResponsibility
+import zendesk.messaging.android.push.PushResponsibility.MESSAGING_SHOULD_DISPLAY
+import zendesk.messaging.android.push.PushResponsibility.MESSAGING_SHOULD_NOT_DISPLAY
+import zendesk.messaging.android.push.PushResponsibility.NOT_FROM_MESSAGING
 
 class ZendeskMessaging(
     private val plugin: ZendeskMessagingPlugin,
@@ -129,9 +131,20 @@ class ZendeskMessaging(
         println("$TAG - updatePushNotificationToken")
     }
 
-    fun shouldBeDisplayed(messageData: Map<String, String>): PushResponsibility {
-        PushNotifications.displayNotification(context = plugin.context, messageData = messageData)
-        return PushNotifications.shouldBeDisplayed(messageData)
+    fun checkAndDisplayNotification(messageData: Map<String, String>): Boolean {
+        val responsibility = PushNotifications.shouldBeDisplayed(messageData)
+        var didHandleNotification = false
+        when (responsibility) {
+            MESSAGING_SHOULD_DISPLAY -> {
+                didHandleNotification = true
+                PushNotifications.displayNotification(context = plugin.context, messageData = messageData)
+            }
+            MESSAGING_SHOULD_NOT_DISPLAY -> {
+            }
+            NOT_FROM_MESSAGING -> {
+            }
+        }
+        return didHandleNotification
     }
 
     fun setLoggable(isLoggable: Boolean) {

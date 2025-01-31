@@ -177,19 +177,18 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(null)
             }
 
-            "shouldBeDisplayed" -> {
+            "checkAndDisplayNotification" -> {
                 try {
                     val messageData = call.argument<Map<String, String>>("messageData")
                         ?: throw Exception("messageData is empty or null")
 
-                    val responsability = zendeskMessaging.shouldBeDisplayed(messageData = messageData)
-                    println("$tag - shouldBeDisplayed: $responsability ${responsability.ordinal}")
+                    val didHandleNotification = zendeskMessaging.checkAndDisplayNotification(messageData = messageData)
 
-                    result.success(responsability.ordinal)
+                    result.success(didHandleNotification)
                 } catch (err: Throwable) {
-                    println("$tag - ZendeskMessaging::shouldBeDisplayed invalid arguments. {'messageData': Map<String, String>}. expected !")
+                    println("$tag - ZendeskMessaging::checkAndDisplayNotification invalid arguments. {'messageData': Map<String, String>}. expected !")
                     println(err.message)
-                    result.error("should_be_displayed_error", err.message, null)
+                    result.error("check_and_display_notification_error", err.message, null)
                 }
             }
 
