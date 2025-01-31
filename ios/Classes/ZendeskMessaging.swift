@@ -174,7 +174,7 @@ public class ZendeskMessaging: NSObject {
         switch shouldBeDisplayed {
         case .messagingShouldDisplay:
             didHandleNotification = true
-            PushNotifications.handleTap(userInfo) { viewController in
+            PushNotifications.handleTap(messageData) { viewController in
             }
         case .messagingShouldNotDisplay:
             break
