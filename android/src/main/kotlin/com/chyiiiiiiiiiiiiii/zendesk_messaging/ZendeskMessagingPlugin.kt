@@ -24,6 +24,7 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var activity: Activity? = null
     var isInitialized: Boolean = false
     var isLoggedIn: Boolean = false
+    var pushNotificationsDisabled: Boolean = false
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "zendesk_messaging")
@@ -177,24 +178,33 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(null)
             }
 
-            "checkAndDisplayNotification" -> {
+            "checkAndDisplayFirebaseNotification" -> {
+                if (pushNotificationsDisabled) {
+                    result.success(false)
+                    return
+                }
                 try {
                     val messageData = call.argument<Map<String, String>>("messageData")
                         ?: throw Exception("messageData is empty or null")
 
-                    val didHandleNotification = zendeskMessaging.checkAndDisplayNotification(messageData = messageData)
+                    val didHandleNotification = zendeskMessaging.checkAndDisplayFirebaseNotification(messageData = messageData)
 
                     result.success(didHandleNotification)
                 } catch (err: Throwable) {
-                    println("$tag - ZendeskMessaging::checkAndDisplayNotification invalid arguments. {'messageData': Map<String, String>}. expected !")
+                    println("$tag - ZendeskMessaging::checkAndDisplayFirebaseNotification invalid arguments. {'messageData': Map<String, String>}. expected !")
                     println(err.message)
-                    result.error("check_and_display_notification_error", err.message, null)
+                    result.error("check_and_display_firebase_notification_error", err.message, null)
                 }
             }
 
             "setLoggable" -> {
                 val isLoggable = call.argument<Boolean>("isLoggable") ?: false
                 zendeskMessaging.setLoggable(isLoggable)
+                result.success(null)
+            }
+
+            "disablePushNotifications" -> {
+                pushNotificationsDisabled = call.argument<Boolean>("pushNotificationsDisabled") ?: false
                 result.success(null)
             }
 

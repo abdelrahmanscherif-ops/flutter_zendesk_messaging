@@ -163,29 +163,30 @@ public class ZendeskMessaging: NSObject {
     }
 
     func updatePushNotificationToken(token: String) {
-        PushNotifications.updatePushNotificationToken(Data(token.utf8))
-        print("\(self.TAG) - updatePushNotificationToken")
-    }
-
-    func checkAndDisplayNotification(messageData: [String: Any]) -> Bool {
-        var didHandleNotification = false
-        let shouldBeDisplayed = PushNotifications.shouldBeDisplayed(messageData)
-
-        switch shouldBeDisplayed {
-        case .messagingShouldDisplay:
-            didHandleNotification = true
-            PushNotifications.handleTap(messageData) { viewController in
-            }
-        case .messagingShouldNotDisplay:
-            break
-        case .notFromMessaging:
-            break
-        @unknown default: break
+        if let hexData = data(fromHexString: token) {
+            PushNotifications.updatePushNotificationToken(hexData)
+            print("\(self.TAG) - updatePushNotificationToken")
         }
-        return didHandleNotification
     }
 
     func setLoggable(isLoggable: Bool) {
         Logger.enabled = isLoggable
+    }
+
+    private func data(fromHexString hex: String) -> Data? {
+        guard hex.count % 2 == 0 else { return nil }
+
+        var data = Data(capacity: hex.count / 2)
+        var index = hex.startIndex
+
+        while index < hex.endIndex {
+            let nextIndex = hex.index(index, offsetBy: 2)
+            let byteString = hex[index..<nextIndex]
+            guard let byte = UInt8(byteString, radix: 16) else { return nil }
+            data.append(byte)
+            index = nextIndex
+        }
+
+        return data
     }
 }

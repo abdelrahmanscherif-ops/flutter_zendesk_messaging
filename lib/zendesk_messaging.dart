@@ -229,15 +229,16 @@ class ZendeskMessaging {
     }
   }
 
-  static Future<bool> checkAndDisplayNotification(
+  static Future<bool> checkAndDisplayFirebaseNotification(
     Map<String, dynamic> messageData,
   ) async {
     try {
       final result = await _channel.invokeMethod<bool>(
-          'checkAndDisplayNotification', {'messageData': messageData});
+          'checkAndDisplayFirebaseNotification', {'messageData': messageData});
       return result ?? false;
     } catch (e) {
-      debugPrint('ZendeskMessaging - shouldBeDisplayed - Error: $e}');
+      debugPrint(
+          'ZendeskMessaging - checkAndDisplayFirebaseNotification - Error: $e}');
       return false;
     }
   }
@@ -247,6 +248,20 @@ class ZendeskMessaging {
       await _channel.invokeMethod('setLoggable', {'isLoggable': isLoggable});
     } catch (e) {
       debugPrint('ZendeskMessaging - setLoggable - Error: $e}');
+    }
+  }
+
+  static Future<void> disablePushNotifications(
+      bool pushNotificationsDisabled) async {
+    try {
+      await _channel.invokeMethod(
+        'disablePushNotifications',
+        {
+          'pushNotificationsDisabled': pushNotificationsDisabled,
+        },
+      );
+    } catch (e) {
+      debugPrint('ZendeskMessaging - disablePushNotifications - Error: $e}');
     }
   }
 }

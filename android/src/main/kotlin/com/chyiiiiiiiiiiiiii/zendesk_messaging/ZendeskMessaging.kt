@@ -131,7 +131,7 @@ class ZendeskMessaging(
         println("$TAG - updatePushNotificationToken")
     }
 
-    fun checkAndDisplayNotification(messageData: Map<String, String>): Boolean {
+    fun checkAndDisplayFirebaseNotification(messageData: Map<String, String>): Boolean {
         val responsibility = PushNotifications.shouldBeDisplayed(messageData)
         var didHandleNotification = false
         when (responsibility) {
@@ -139,8 +139,10 @@ class ZendeskMessaging(
                 didHandleNotification = true
                 PushNotifications.displayNotification(context = plugin.context, messageData = messageData)
             }
+
             MESSAGING_SHOULD_NOT_DISPLAY -> {
             }
+
             NOT_FROM_MESSAGING -> {
             }
         }
