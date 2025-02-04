@@ -67,7 +67,11 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
         case .messagingShouldDisplay:
             // This push belongs to ZendeskMessaging and the SDK is able to handle when the end user interacts with it
             PushNotifications.handleTap(userInfo) { viewController in
-                // Handle displaying the returned viewController in here
+                if let topViewController = UIApplication.shared.delegate?.window??.rootViewController {
+                    if let viewController {
+                        topViewController.present(viewController, animated: false)
+                    }
+                }
             }
         case .messagingShouldNotDisplay:
             // This push belongs to ZendeskMessaging but the interaction should not be handled by the SDK
