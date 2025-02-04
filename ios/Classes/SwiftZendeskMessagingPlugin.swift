@@ -9,7 +9,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
     var isInitialized = false
     var isLoggedIn = false
     var pushNotificationsDisabled = false
-
+    
     init(channel: FlutterMethodChannel) {
         self.channel = channel
         super.init();
@@ -31,7 +31,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
                                        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         let shouldBeDisplayed = PushNotifications.shouldBeDisplayed(userInfo)
-
+        
         let displayNotification = {
             if #available(iOS 14.0, *) {
                 completionHandler([.banner, .sound, .badge])
@@ -39,7 +39,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
                 completionHandler([.alert, .sound, .badge])
             }
         }
-
+        
         switch shouldBeDisplayed {
         case .messagingShouldDisplay:
             // Only display the notification if the app is active.
@@ -58,27 +58,27 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
     }
     
     public func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                         didReceive response: UNNotificationResponse,
-                                         withCompletionHandler completionHandler: @escaping () -> Void) {
-         let userInfo = response.notification.request.content.userInfo
-         let shouldBeDisplayed = PushNotifications.shouldBeDisplayed(userInfo)
-
-         switch shouldBeDisplayed {
-         case .messagingShouldDisplay:
-             // This push belongs to ZendeskMessaging and the SDK is able to handle when the end user interacts with it
-             PushNotifications.handleTap(userInfo) { viewController in
+                                       didReceive response: UNNotificationResponse,
+                                       withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        let shouldBeDisplayed = PushNotifications.shouldBeDisplayed(userInfo)
+        
+        switch shouldBeDisplayed {
+        case .messagingShouldDisplay:
+            // This push belongs to ZendeskMessaging and the SDK is able to handle when the end user interacts with it
+            PushNotifications.handleTap(userInfo) { viewController in
                 // Handle displaying the returned viewController in here
-             }
-         case .messagingShouldNotDisplay:
-             // This push belongs to ZendeskMessaging but the interaction should not be handled by the SDK
-             break
-         case .notFromMessaging:
-             break
-         @unknown default: break
-         }
-
-         completionHandler()
-     }
+            }
+        case .messagingShouldNotDisplay:
+            // This push belongs to ZendeskMessaging but the interaction should not be handled by the SDK
+            break
+        case .notFromMessaging:
+            break
+        @unknown default: break
+        }
+        
+        completionHandler()
+    }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         DispatchQueue.main.async {
@@ -177,7 +177,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
         case "checkAndDisplayFirebaseNotification":
             // iOS does not support Firebase push notifications
             //They are sent via APNs directly and handled by the UNUserNotificationCenterDelegate
-             result(false)
+            result(false)
         case "setLoggable":
             let isLoggable: Bool = arguments?["isLoggable"] as! Bool
             zendeskMessaging?.setLoggable(isLoggable:isLoggable)
