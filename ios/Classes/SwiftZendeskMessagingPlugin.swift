@@ -19,8 +19,6 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "zendesk_messaging", binaryMessenger: registrar.messenger())
         let instance = SwiftZendeskMessagingPlugin(channel: channel)
-        let center = UNUserNotificationCenter.current()
-        center.delegate = instance
         registrar.addMethodCallDelegate(instance, channel: channel)
         registrar.addApplicationDelegate(instance)
     }
@@ -51,7 +49,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             break
         case .notFromMessaging:
             // // This push does not belong to ZendeskMessaging
-            displayNotification()
+            return
         @unknown default:
             break
         }
@@ -77,7 +75,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             // This push belongs to ZendeskMessaging but the interaction should not be handled by the SDK
             break
         case .notFromMessaging:
-            break
+            return
         @unknown default: break
         }
         
