@@ -43,9 +43,12 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             // Only display the notification if the app is active.
             if !pushNotificationsDisabled {
                 displayNotification()
+            } else {
+                completionHandler([])
             }
         case .messagingShouldNotDisplay:
             // This push belongs to ZendeskMessaging but the interaction should not be handled by the SDK
+            completionHandler([])
             break
         case .notFromMessaging:
             // // This push does not belong to ZendeskMessaging
