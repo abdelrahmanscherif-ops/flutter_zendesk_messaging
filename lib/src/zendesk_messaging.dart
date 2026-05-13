@@ -761,6 +761,27 @@ class ZendeskMessaging {
     }
   }
 
+  /// iOS only: consume a stored cold-start notification tap.
+  ///
+  /// Returns `true` once if the app was launched by tapping a Zendesk
+  /// notification while it was in a killed state, then clears the flag.
+  /// Always returns `false` on Android.
+  static Future<bool> consumePendingNotificationTap() async {
+    if (!Platform.isIOS) return false;
+    try {
+      final result =
+          await _channel.invokeMethod<bool>('consumePendingNotificationTap');
+      return result ?? false;
+    } catch (e, stackTrace) {
+      ZendeskMessagingConfig.logError(
+        'consumePendingNotificationTap failed',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
   /// Enable or disable Zendesk push notifications.
   ///
   /// Pass `true` to suppress notifications (e.g. when the app is foregrounded

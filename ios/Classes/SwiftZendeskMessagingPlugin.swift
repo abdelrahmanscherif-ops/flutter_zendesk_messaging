@@ -9,6 +9,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
     var isInitialized = false
     var isLoggedIn = false
     var pushNotificationsDisabled = false
+    private var pendingNotificationTap: [AnyHashable: Any]? = nil
 
 
     init(channel: FlutterMethodChannel) {
@@ -62,12 +63,17 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
 
         switch shouldBeDisplayed {
         case .messagingShouldDisplay:
-            PushNotifications.handleTap(userInfo) { viewController in
-                if let topViewController = UIApplication.shared.delegate?.window??.rootViewController {
-                    if let viewController {
-                        topViewController.present(viewController, animated: false)
+            if isInitialized {
+                PushNotifications.handleTap(userInfo) { viewController in
+                    if let topViewController = UIApplication.shared.delegate?.window??.rootViewController {
+                        if let viewController {
+                            topViewController.present(viewController, animated: false)
+                        }
                     }
                 }
+            } else {
+                // App was killed — store for Flutter to consume after Zendesk initializes
+                pendingNotificationTap = userInfo
             }
         case .messagingShouldNotDisplay:
             break
@@ -306,6 +312,11 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             ) { success in
                 result(nil)
             }
+
+        case "consumePendingNotificationTap":
+            let hasPending = pendingNotificationTap != nil
+            pendingNotificationTap = nil
+            result(hasPending)
 
         default:
             result(FlutterMethodNotImplemented)
