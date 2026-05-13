@@ -25,6 +25,20 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
         registrar.addApplicationDelegate(instance)
     }
 
+    // Captures cold-start notification taps. launchOptions is the only
+    // reliable source on iOS because it is populated before the Flutter
+    // engine (and therefore the UNUserNotificationCenterDelegate) is ready.
+    public func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
+    ) -> Bool {
+        if let userInfo = launchOptions[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any],
+           PushNotifications.shouldBeDisplayed(userInfo) == .messagingShouldDisplay {
+            pendingNotificationTap = userInfo
+        }
+        return false
+    }
+
     public func userNotificationCenter(_ center: UNUserNotificationCenter,
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
