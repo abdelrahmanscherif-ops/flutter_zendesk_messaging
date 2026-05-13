@@ -271,7 +271,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
                 result(FlutterError(code: "invalid_argument", message: "token is required", details: nil))
                 return
             }
-            zendeskMessaging?.updatePushNotificationTokenString(token)
+            zendeskMessaging?.updatePushNotificationToken(token: token)
             result(nil)
 
         case "shouldBeDisplayed":
