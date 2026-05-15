@@ -32,8 +32,10 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
     ) -> Bool {
-        if let userInfo = launchOptions[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any],
-           PushNotifications.shouldBeDisplayed(userInfo) == .messagingShouldDisplay {
+        // Store unconditionally — shouldBeDisplayed cannot be called here because
+        // the Zendesk SDK is not yet initialized. Validation happens in
+        // consumePendingNotificationTap after the SDK is ready.
+        if let userInfo = launchOptions[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
             pendingNotificationTap = userInfo
         }
         return false
@@ -328,9 +330,13 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             }
 
         case "consumePendingNotificationTap":
-            let hasPending = pendingNotificationTap != nil
+            guard let userInfo = pendingNotificationTap else {
+                result(false)
+                return
+            }
             pendingNotificationTap = nil
-            result(hasPending)
+            // Validate now — Zendesk is initialized at this call site
+            result(PushNotifications.shouldBeDisplayed(userInfo) == .messagingShouldDisplay)
 
         default:
             result(FlutterMethodNotImplemented)
