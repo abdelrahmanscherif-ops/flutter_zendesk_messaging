@@ -79,17 +79,12 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
 
         switch shouldBeDisplayed {
         case .messagingShouldDisplay:
+            // Always route through Flutter navigation. Using PushNotifications.handleTap
+            // presents Zendesk's native VC outside Flutter's hierarchy, causing a black
+            // screen when the SDK connection is in a transitional state.
+            pendingNotificationTap = userInfo
             if isInitialized {
-                PushNotifications.handleTap(userInfo) { viewController in
-                    if let topViewController = UIApplication.shared.delegate?.window??.rootViewController {
-                        if let viewController {
-                            topViewController.present(viewController, animated: false)
-                        }
-                    }
-                }
-            } else {
-                // App was killed — store for Flutter to consume after Zendesk initializes
-                pendingNotificationTap = userInfo
+                channel.invokeMethod("onZendeskNotificationTapped", nil)
             }
         case .messagingShouldNotDisplay:
             break

@@ -68,6 +68,8 @@ class ZendeskMessaging {
       StreamController<int>.broadcast();
   static final StreamController<ZendeskEvent> _eventController =
       StreamController<ZendeskEvent>.broadcast();
+  static final StreamController<void> _notificationTapController =
+      StreamController<void>.broadcast();
 
   /// Stream of unread message count changes.
   ///
@@ -76,6 +78,11 @@ class ZendeskMessaging {
   /// [UnreadMessageCountChanged] events.
   static Stream<int> get unreadMessagesCountStream =>
       _unreadMessagesCountController.stream;
+
+  /// iOS only: fires when the user taps a Zendesk push notification while
+  /// the app is in the background. Listen to this to open the chat UI.
+  static Stream<void> get notificationTapStream =>
+      _notificationTapController.stream;
 
   /// Stream of all Zendesk events.
   ///
@@ -844,6 +851,9 @@ class ZendeskMessaging {
             _unreadMessagesCountController.add(event.totalUnreadCount);
           }
         }
+
+      case 'onZendeskNotificationTapped':
+        _notificationTapController.add(null);
     }
   }
 }
