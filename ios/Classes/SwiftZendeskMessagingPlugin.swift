@@ -84,7 +84,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             // screen when the SDK connection is in a transitional state.
             pendingNotificationTap = userInfo
             if isInitialized {
-                channel.invokeMethod("onZendeskNotificationTapped", nil)
+                channel.invokeMethod("onZendeskNotificationTapped", arguments: nil)
             }
         case .messagingShouldNotDisplay:
             break
