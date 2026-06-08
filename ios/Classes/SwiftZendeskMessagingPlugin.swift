@@ -38,7 +38,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
         if let userInfo = launchOptions[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
             pendingNotificationTap = userInfo
         }
-        return false
+        return true
     }
 
     public func userNotificationCenter(_ center: UNUserNotificationCenter,
