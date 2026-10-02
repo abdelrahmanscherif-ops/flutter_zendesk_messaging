@@ -1,16 +1,13 @@
 import Flutter
 import UIKit
-import ZendeskSDKMessaging
 
-public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotificationCenterDelegate {
-    let TAG = "[SwiftZendeskMessagingPlugin]"
+@objc(ZendeskMessagingPlugin)
+public class ZendeskMessagingPlugin: NSObject, FlutterPlugin {
+    let TAG = "[ZendeskMessagingPlugin]"
     private var channel: FlutterMethodChannel
     private var zendeskMessaging: ZendeskMessaging?
     var isInitialized = false
     var isLoggedIn = false
-    var pushNotificationsDisabled = false
-    private var pendingNotificationTap: [AnyHashable: Any]? = nil
-
 
     init(channel: FlutterMethodChannel) {
         self.channel = channel
@@ -20,80 +17,9 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "zendesk_messaging", binaryMessenger: registrar.messenger())
-        let instance = SwiftZendeskMessagingPlugin(channel: channel)
+        let instance = ZendeskMessagingPlugin(channel: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
         registrar.addApplicationDelegate(instance)
-    }
-
-    // Captures cold-start notification taps. launchOptions is the only
-    // reliable source on iOS because it is populated before the Flutter
-    // engine (and therefore the UNUserNotificationCenterDelegate) is ready.
-    public func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
-    ) -> Bool {
-        // Store unconditionally — shouldBeDisplayed cannot be called here because
-        // the Zendesk SDK is not yet initialized. Validation happens in
-        // consumePendingNotificationTap after the SDK is ready.
-        if let userInfo = launchOptions[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
-            pendingNotificationTap = userInfo
-        }
-        return true
-    }
-
-    public func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                       willPresent notification: UNNotification,
-                                       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        let userInfo = notification.request.content.userInfo
-        let shouldBeDisplayed = PushNotifications.shouldBeDisplayed(userInfo)
-
-        let displayNotification = {
-            if #available(iOS 14.0, *) {
-                completionHandler([.banner, .sound, .badge])
-            } else {
-                completionHandler([.alert, .sound, .badge])
-            }
-        }
-
-        switch shouldBeDisplayed {
-        case .messagingShouldDisplay:
-            if !pushNotificationsDisabled {
-                displayNotification()
-            } else {
-                completionHandler([])
-            }
-        case .messagingShouldNotDisplay:
-            completionHandler([])
-        case .notFromMessaging:
-            return
-        @unknown default:
-            break
-        }
-    }
-
-    public func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                       didReceive response: UNNotificationResponse,
-                                       withCompletionHandler completionHandler: @escaping () -> Void) {
-        let userInfo = response.notification.request.content.userInfo
-        let shouldBeDisplayed = PushNotifications.shouldBeDisplayed(userInfo)
-
-        switch shouldBeDisplayed {
-        case .messagingShouldDisplay:
-            // Always route through Flutter navigation. Using PushNotifications.handleTap
-            // presents Zendesk's native VC outside Flutter's hierarchy, causing a black
-            // screen when the SDK connection is in a transitional state.
-            pendingNotificationTap = userInfo
-            if isInitialized {
-                channel.invokeMethod("onZendeskNotificationTapped", arguments: nil)
-            }
-        case .messagingShouldNotDisplay:
-            break
-        case .notFromMessaging:
-            return
-        @unknown default: break
-        }
-
-        completionHandler()
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -252,18 +178,6 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             }
             zendeskMessaging?.clearConversationFields()
             result(nil)
-        case "checkAndDisplayFirebaseNotification":
-            // iOS uses APNs directly via UNUserNotificationCenterDelegate, not Firebase
-            result(false)
-
-        case "setLoggable":
-            let isLoggable: Bool = arguments?["isLoggable"] as? Bool ?? false
-            zendeskMessaging?.setLoggable(isLoggable: isLoggable)
-            result(nil)
-
-        case "disablePushNotifications":
-            pushNotificationsDisabled = arguments?["pushNotificationsDisabled"] as? Bool ?? false
-            result(nil)
 
         case "invalidate":
             if !isInitialized {
@@ -272,6 +186,20 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
                 return
             }
             zendeskMessaging?.invalidate()
+            result(nil)
+
+        // ================================================================
+        // Locale
+        // ================================================================
+
+        case "setLocale":
+            // No isInitialized check — setLocale only writes AppleLanguages,
+            // which iOS reads at app launch, so it applies from the next launch.
+            guard let locale = arguments?["locale"] as? String, !locale.isEmpty else {
+                result(FlutterError(code: "invalid_argument", message: "locale is required", details: nil))
+                return
+            }
+            zendeskMessaging?.setLocale(locale: locale)
             result(nil)
 
         // ================================================================
@@ -288,7 +216,7 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
                 result(FlutterError(code: "invalid_argument", message: "token is required", details: nil))
                 return
             }
-            zendeskMessaging?.updatePushNotificationToken(token: token)
+            zendeskMessaging?.updatePushNotificationTokenString(token)
             result(nil)
 
         case "shouldBeDisplayed":
@@ -323,15 +251,6 @@ public class SwiftZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotific
             ) { success in
                 result(nil)
             }
-
-        case "consumePendingNotificationTap":
-            guard let userInfo = pendingNotificationTap else {
-                result(false)
-                return
-            }
-            pendingNotificationTap = nil
-            // Validate now — Zendesk is initialized at this call site
-            result(PushNotifications.shouldBeDisplayed(userInfo) == .messagingShouldDisplay)
 
         default:
             result(FlutterMethodNotImplemented)
