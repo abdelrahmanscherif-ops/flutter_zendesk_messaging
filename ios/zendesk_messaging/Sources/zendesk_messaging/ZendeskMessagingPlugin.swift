@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import ZendeskSDKMessaging
 
 @objc(ZendeskMessagingPlugin)
 public class ZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotificationCenterDelegate {
@@ -8,9 +9,9 @@ public class ZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotification
     private var zendeskMessaging: ZendeskMessaging?
     var isInitialized = false
     var isLoggedIn = false
-
     var pushNotificationsDisabled = false
     private var pendingNotificationTap: [AnyHashable: Any]? = nil
+
 
     init(channel: FlutterMethodChannel) {
         self.channel = channel
@@ -338,7 +339,7 @@ public class ZendeskMessagingPlugin: NSObject, FlutterPlugin, UNUserNotification
             ) { success in
                 result(nil)
             }
-        
+
         case "consumePendingNotificationTap":
             guard let userInfo = pendingNotificationTap else {
                 result(false)
