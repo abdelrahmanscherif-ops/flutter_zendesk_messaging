@@ -522,8 +522,7 @@ class ZendeskLoginResponse {
 class ZendeskMessage {
   String id;
   String conversationId;
-  String? authorId;
-  String? content;
+  ZendeskMessageRole role;
   DateTime? timestamp;
 }
 ```
@@ -539,6 +538,11 @@ class ZendeskMessage {
 - `connectedRealtime`
 - `connectingRealtime`
 - `disconnected`
+- `unknown`
+
+**ZendeskMessageRole**
+- `user`
+- `business`
 - `unknown`
 
 **ZendeskPushResponsibility**
