@@ -546,4 +546,8 @@ public class ZendeskMessaging: NSObject {
             completion(false)
         }
     }
+
+    func setLoggable(isLoggable: Bool) {
+        Logger.enabled = isLoggable
+    }
 }
