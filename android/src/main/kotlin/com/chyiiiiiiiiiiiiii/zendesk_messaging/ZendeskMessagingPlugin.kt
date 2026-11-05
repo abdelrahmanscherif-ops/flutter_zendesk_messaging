@@ -16,7 +16,6 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
     private lateinit var zendeskMessaging: ZendeskMessaging
-    lateinit var context: Context
 
     var activity: Activity? = null
     var applicationContext: Context? = null
@@ -27,7 +26,7 @@ class ZendeskMessagingPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "zendesk_messaging")
         channel.setMethodCallHandler(this)
-        context = flutterPluginBinding.applicationContext
+        applicationContext = flutterPluginBinding.applicationContext
         zendeskMessaging = ZendeskMessaging(this, channel)
     }
 
