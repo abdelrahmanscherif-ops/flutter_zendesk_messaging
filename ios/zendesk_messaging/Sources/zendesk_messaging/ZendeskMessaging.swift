@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import ZendeskSDKLogger
 import ZendeskSDKMessaging
 import ZendeskSDK
 import UserNotifications
