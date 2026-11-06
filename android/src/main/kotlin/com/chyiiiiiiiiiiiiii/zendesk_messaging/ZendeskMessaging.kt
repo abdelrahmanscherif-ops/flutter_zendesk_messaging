@@ -624,8 +624,9 @@ class ZendeskMessaging(
         var didHandleNotification = false
         when (responsibility) {
             PushResponsibility.MESSAGING_SHOULD_DISPLAY -> {
+                val context = plugin.applicationContext ?: plugin.activity ?: return false
+                PushNotifications.displayNotification(context = context, messageData = messageData)
                 didHandleNotification = true
-                PushNotifications.displayNotification(context = plugin.context, messageData = messageData)
             }
             PushResponsibility.MESSAGING_SHOULD_NOT_DISPLAY -> {}
             PushResponsibility.NOT_FROM_MESSAGING -> {}
